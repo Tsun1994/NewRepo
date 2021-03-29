@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?scenebuilder-styleshet /styles/style.css?>
+
+<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="500.0" minWidth="700.0" prefHeight="446.0" prefWidth="682.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+   <stylesheets> <URL value="@/styles/style.css" /> </stylesheets>
+   <children>
+      <MenuBar>
+        <menus>
+          <Menu mnemonicParsing="false" text="Участники">
+            <items>
+              <MenuItem fx:id="Igor" mnemonicParsing="false" onAction="#sendMsgIgor" text="Igor" />
+                <MenuItem fx:id="Lena" mnemonicParsing="false" onAction="#sendMsgLena" text="Lena" />
+                <MenuItem fx:id="Rosa" mnemonicParsing="false" onAction="#sendMsgRosa" text="Rosa" />
+                <MenuItem fx:id="Masha" mnemonicParsing="false" onAction="#sendMsgMasha" text="Masha" />
+                <MenuItem fx:id="Bilan" mnemonicParsing="false" onAction="#sendMsgBilan" text="Bilan" />
+                <MenuItem fx:id="Troll" mnemonicParsing="false" onAction="#sendMsgTroll" text="Troll" />
+                <MenuItem fx:id="Dog" mnemonicParsing="false" onAction="#sendMsgDog" text="Dog" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Edit">
+            <items>
+              <MenuItem fx:id="Всеучастники" mnemonicParsing="false" onAction="#sendMsgDog" onMenuValidation="#sendMsgIgor" text="Все участники" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="Help">
+            <items>
+              <MenuItem mnemonicParsing="false" text="About" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+      <Label prefHeight="17.0" prefWidth="711.0" text="Чат для всех и вся" textAlignment="JUSTIFY" textFill="#0a0000" wrapText="true">
+         <font>
+            <Font name="Bell MT Bold" size="15.0" />
+         </font>
+         <VBox.margin>
+            <Insets left="300.0" />
+         </VBox.margin></Label>
+      <TextArea fx:id="textArea" prefHeight="476.0" prefWidth="700.0">
+         <VBox.margin>
+            <Insets />
+         </VBox.margin></TextArea>
+      <HBox prefHeight="102.0" prefWidth="750.0">
+         <children>
+            <TextField fx:id="textField" maxWidth="546.0" onAction="#sendMsg" prefHeight="30.0" prefWidth="546.0" translateX="2.0" translateY="10.0">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+               <HBox.margin>
+                  <Insets left="10.0" top="5.0" />
+               </HBox.margin></TextField>
+            <Button fx:id="sendBtn" cache="true" cacheShape="false" contentDisplay="BOTTOM" focusTraversable="false" mnemonicParsing="false" onAction="#sendMsg" prefHeight="25.0" prefWidth="106.0" text="Button" translateY="10.0">
+               <opaqueInsets>
+                  <Insets top="2.0" />
+               </opaqueInsets>
+               <font>
+                  <Font name="System Bold" size="14.0" />
+               </font>
+               <HBox.margin>
+                  <Insets left="15.0" right="5.0" top="5.0" />
+               </HBox.margin></Button>
+         </children>
+      </HBox>
+   </children>
+</VBox>
