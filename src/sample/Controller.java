@@ -1,61 +1,71 @@
 package sample;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
 
-import java.util.Random;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.URL;
+import java.util.ResourceBundle;
 
-public class Controller {
+public class Controller implements Initializable {
     @FXML
     TextArea textArea;
 
     @FXML
     TextField textField;
 
+    Socket socket;
+    DataInputStream in;
+    DataOutputStream out;
+
+    public static final String ADDRESS = "localhost";
+    public static final int PORT = 6001;
+
+
     @FXML
-    void sendMsg(){
-        textArea.appendText("You: " + textField.getText() + "\n");
-        textField.clear();
-        textField.requestFocus();
-        Random random = new Random();
-        int rand = random.nextInt(8);
-        switch (rand){
-            case 1: textArea.appendText("Igor: ага, я тоже это видел" + "\n");
-            case 2: textArea.appendText("Lena: а что я тут пишу" + "\n");
-            case 3: textArea.appendText("Rosa: дайте две" + "\n");
-            case 4: textArea.appendText("Masha: пески времени не забыты" + "\n");
-            case 5: textArea.appendText("Bilan: невозможное возможно" + "\n");
-            case 6: textArea.appendText("Troll: кто вы такие? я вас не звал" + "\n");
-            case 7: textArea.appendText("Dog: гав гав гав" + "\n");
+    void sendMsg() {
+        try {
+            out.writeUTF(textField.getText());
+            textField.clear();
+            textField.requestFocus();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
-    @FXML
-    void sendMsgIgor (){
-        textArea.appendText("Igor: Привет, я Игорь" + "\n");
-    }
-    @FXML
-    void sendMsgLena (){
-        textArea.appendText("Lena: Привет, я Лена" + "\n");
-    }
-    @FXML
-    void sendMsgRosa (){
-        textArea.appendText("Rosa: Привет, я Роза, работаю в банке" + "\n");
-    }
-    @FXML
-    void sendMsgMasha (){
-        textArea.appendText("Masha: Я Мария, приятно познакомиться" + "\n");
-    }
-    @FXML
-    void sendMsgBilan (){
-        textArea.appendText("Bilan: Я до сих пор мечтаю об олимпийском" + "\n");
-    }
-    @FXML
-    void sendMsgTroll (){
-        textArea.appendText("Troll: Жирный жирный жирный, как поезд пассажирный" + "\n");
-    }
-    @FXML
-    void sendMsgDog (){
-        textArea.appendText("Dog: *радостный приветливый лай*" + "\n");
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        try {
+            socket = new Socket(ADDRESS, PORT);
+
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
+
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        String str  = in.readUTF();
+                        if ("/serverClosed".equals(str)) {
+                            break;
+                        }
+                        textArea.appendText(str + "\n");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
