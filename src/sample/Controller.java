@@ -1,61 +1,134 @@
 package sample;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.fxml.Initializable;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 
-import java.util.Random;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
+import java.net.URL;
+import java.util.ResourceBundle;
 
 public class Controller {
     @FXML
     TextArea textArea;
-
     @FXML
     TextField textField;
-
     @FXML
-    void sendMsg(){
-        textArea.appendText("You: " + textField.getText() + "\n");
-        textField.clear();
-        textField.requestFocus();
-        Random random = new Random();
-        int rand = random.nextInt(8);
-        switch (rand){
-            case 1: textArea.appendText("Igor: ага, я тоже это видел" + "\n");
-            case 2: textArea.appendText("Lena: а что я тут пишу" + "\n");
-            case 3: textArea.appendText("Rosa: дайте две" + "\n");
-            case 4: textArea.appendText("Masha: пески времени не забыты" + "\n");
-            case 5: textArea.appendText("Bilan: невозможное возможно" + "\n");
-            case 6: textArea.appendText("Troll: кто вы такие? я вас не звал" + "\n");
-            case 7: textArea.appendText("Dog: гав гав гав" + "\n");
+    HBox bottomPanel;
+    @FXML
+    HBox upperPanel;
+    @FXML
+    TextField loginField;
+    @FXML
+    PasswordField passwordField;
+
+
+    Socket socket;
+    DataInputStream in;
+    DataOutputStream out;
+
+    public static final String ADDRESS = "localhost";
+    public static final int PORT = 6001;
+
+    private boolean isAuthorized;
+
+    public void setAuthorized(boolean authorized){
+        this.isAuthorized = authorized;
+
+        if (!isAuthorized){
+            upperPanel.setVisible(true);
+            upperPanel.setManaged(true);
+
+            bottomPanel.setVisible(false);
+            bottomPanel.setManaged(false);
+        } else {
+            upperPanel.setVisible(false);
+            upperPanel.setManaged(false);
+
+            bottomPanel.setVisible(true);
+            bottomPanel.setManaged(true);
         }
     }
+
     @FXML
-    void sendMsgIgor (){
-        textArea.appendText("Igor: Привет, я Игорь" + "\n");
+    void sendMsg() {
+
     }
-    @FXML
-    void sendMsgLena (){
-        textArea.appendText("Lena: Привет, я Лена" + "\n");
+
+    public void connect() {
+        try {
+            socket = new Socket(ADDRESS, PORT);
+
+            new Thread(() -> {
+                try {
+                    while (true) {
+                        String str  = in.readUTF();
+                        if ("/auth-OK".equals(str)) {
+                            setAuthorized(true);
+                            textArea.clear();
+                            break;
+                        } else {
+                            textArea.appendText(str + "\n");
+                        }
+                    }
+
+                    while (true) {
+                        String str  = in.readUTF();
+                        if ("/serverClosed".equals(str)) {
+                            break;
+                        }
+                        textArea.appendText(str + "\n");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    setAuthorized(false);
+                }
+            }).start();
+        } catch (IOException e) {
+            e.printStackTrace();
+            textArea.appendText("Connection refused \n");
+        }
     }
-    @FXML
-    void sendMsgRosa (){
-        textArea.appendText("Rosa: Привет, я Роза, работаю в банке" + "\n");
+
+    public void tryToAuth(ActionEvent actionEvent) {
+        if (socket == null || socket.isClosed()){
+            connect();
+        }
+        try {
+            out.writeUTF("/auth " + loginField.getText() + " " + passwordField.getText());
+            loginField.clear();
+            passwordField.clear();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
     }
-    @FXML
-    void sendMsgMasha (){
-        textArea.appendText("Masha: Я Мария, приятно познакомиться" + "\n");
-    }
-    @FXML
-    void sendMsgBilan (){
-        textArea.appendText("Bilan: Я до сих пор мечтаю об олимпийском" + "\n");
-    }
-    @FXML
-    void sendMsgTroll (){
-        textArea.appendText("Troll: Жирный жирный жирный, как поезд пассажирный" + "\n");
-    }
-    @FXML
-    void sendMsgDog (){
-        textArea.appendText("Dog: *радостный приветливый лай*" + "\n");
+
+    public void disconnect(){
+        if (socket != null){
+            if (socket.isClosed()){
+                try {
+                    out.writeUTF("/end");
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+
+                try {
+                    socket.close();
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }
